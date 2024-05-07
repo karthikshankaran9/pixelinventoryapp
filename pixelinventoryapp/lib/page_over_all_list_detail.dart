@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:pixelinventoryapp/apiCommunication/api_communication.dart';
+import 'package:pixelinventoryapp/apiCommunication/page_api_communication.dart';
+import 'package:pixelinventoryapp/common/Page_common.dart';
 
 class Overalllist extends StatefulWidget {
   @override
@@ -14,13 +15,13 @@ class _OveralllistState extends State<Overalllist> {
 
   @override
   void initState() {
-  super.initState();
-  updateComponentsList('allcomponent');
-}
+    super.initState();
+    ComponentCategory componentCategory = ComponentCategory.allcomponents;
+    updateComponentsList(componentCategory.index);
+  }
 
-  void updateComponentsList(String getallComponetsAPI) async {
-    _componentList = await getallComponentsListFromServer(getallComponetsAPI);
-
+  void updateComponentsList(int componentCategory) async {
+    _componentList = await getComponentsListFromServer(componentCategory);
     setState(() {
       stringList =
           _componentList.map((item) => item['c_name'].toString()).toList();
@@ -56,7 +57,7 @@ class _OveralllistState extends State<Overalllist> {
             ),
           ),
           leading: IconButton(
-            icon:const Icon(Icons.arrow_back),
+            icon: const Icon(Icons.arrow_back),
             onPressed: () {
               Navigator.pop(context);
             },
@@ -112,7 +113,7 @@ class _OveralllistState extends State<Overalllist> {
                         );
                         return ListTile(
                           title: Text(filteredList[index]),
-                          subtitle: Text('Count: ${component['count']}'),
+                          subtitle: Text('Count: ${component['no_of_counts']}'),
                           onTap: () {
                             _textEditingController.text = filteredList[index];
                           },

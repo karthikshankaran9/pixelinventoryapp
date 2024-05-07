@@ -1,6 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 
+enum ComponentCategory {
+  programmable,
+  nonprogrammable,
+  allcomponents
+}
+
 Future<bool?> getFluttertoastMessage(Color bgColor, Color txtColor,
     String message, Toast length, double fontsize, ToastGravity gravity) {
   return Fluttertoast.showToast(
@@ -36,3 +42,6 @@ Widget getCommonTextField(TextEditingController textController,
     ),
   );
 }
+
+
+

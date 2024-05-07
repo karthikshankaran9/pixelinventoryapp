@@ -2,25 +2,25 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:flutter/material.dart';
+import 'package:pixelinventoryapp/common/Page_common.dart';
 
 const String rmsWebServerHost = 'http://10.44.100.27:8000';
 const String loginAPI = 'login';
-const String registrationiAPI = 'registration';
+const String registrationAPI = 'registration';
 const String emailAPI = 'email';
+const String getComponentListAPI = 'getComponentList';
 
 Future<Map<String, dynamic>> getLoginInfo(String email, String password) async {
-  final reqBody = {
-    'Gmail': email,
-    'Password': password,
+  var reqBody = {
+    "Gmail": email,
+    "Password": password,
   };
+  String str = json.encode(reqBody);
 
   try {
     final response = await http.post(
       Uri.parse('$rmsWebServerHost/$loginAPI'),
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: jsonDecode(reqBody as String),
+      body: str,
     );
     Map<String, dynamic> data;
     if (response.statusCode == 200) {
@@ -36,17 +36,18 @@ Future<Map<String, dynamic>> getLoginInfo(String email, String password) async {
 
 Future<Map<String, dynamic>> registerLoginInfo(
     String name, String gmail, String password, String confirmPassword) async {
-  var reqBody = {};
-  reqBody["name"] = name;
-  reqBody["gmail"] = gmail;
-  reqBody["password"] = password;
-  reqBody["confirmPassword"] = confirmPassword;
+  var reqBody = {
+    "name": name,
+    "gmail": gmail,
+    "password": password,
+    "confirmPassword": confirmPassword,
+  };
 
   String str = json.encode(reqBody);
 
   try {
     final response = await http.post(
-      Uri.parse('$rmsWebServerHost/$registrationiAPI'),
+      Uri.parse('$rmsWebServerHost/$registrationAPI'),
       body: str,
     );
     Map<String, dynamic> data;
@@ -62,48 +63,33 @@ Future<Map<String, dynamic>> registerLoginInfo(
 }
 
 Future<List<Map<String, dynamic>>> getComponentsListFromServer(
-    String getComponetsAPI) async {
-  final response = await http
-      .get(Uri.parse('$rmsWebServerHost/$getComponetsAPI'), headers: {
-    "Accept": "application/json",
-    "Access-Control-Allow-Origin": "*"
-  });
+    int deviceCategory) async {
+  var reqBody = {'category': (deviceCategory + 1)};
+
+  final response = await http.post(
+    Uri.parse('$rmsWebServerHost/$getComponentListAPI'),
+    headers: {
+      "Content-Type": "application/json", 
+    },
+    body: jsonEncode(reqBody), 
+  );
 
   if (response.statusCode == 200) {
     List<Map<String, dynamic>> componentList =
         List<Map<String, dynamic>>.from(jsonDecode(response.body));
-
     return componentList;
   } else {
     throw Exception('Failed to load data');
   }
 }
 
-Future<List<Map<String, dynamic>>> getallComponentsListFromServer(
-    String getallComponetsAPI) async {
-  final response = await http
-      .get(Uri.parse('$rmsWebServerHost/$getallComponetsAPI'), headers: {
-    "Accept": "application/json",
-    "Access-Control-Allow-Origin": "*"
-  });
-
-  if (response.statusCode == 200) {
-    List<Map<String, dynamic>> componentList =
-        List<Map<String, dynamic>>.from(jsonDecode(response.body));
-
-    return componentList;
-  } else {
-    throw Exception('Failed to load data');
-  }
-}
-
-
-Future<void> sendSelectedItems(String name, List<String> selectedItems, Map<String, int> quantities) async {
-   Map<String, dynamic> payload = {
-  'name': name,
-  'subject': 'Component Request',
-  'body': selectedItems,
-};
+Future<void> sendSelectedItems(String name, List<String> selectedItems,
+    Map<String, int> quantities) async {
+  Map<String, dynamic> payload = {
+    'name': name,
+    'subject': 'Component Request',
+    'body': selectedItems,
+  };
 
   var jsonPayload = json.encode(payload);
 
@@ -117,32 +103,31 @@ Future<void> sendSelectedItems(String name, List<String> selectedItems, Map<Stri
     );
 
     if (response.statusCode == 200) {
-      Fluttertoast.showToast(
-        msg: 'Items sent successfully!',
-        toastLength: Toast.LENGTH_SHORT,
-        gravity: ToastGravity.CENTER,
-        backgroundColor: Colors.green,
-        textColor: Colors.white,
-        fontSize: 16.0,
-      );
+       getFluttertoastMessage(
+          Colors.green,
+          Colors.white,
+          'Items sent successfully!',
+          Toast.LENGTH_LONG,
+          15,
+          ToastGravity.CENTER);
     } else {
-      Fluttertoast.showToast(
-        msg: 'Failed to send items.',
-        toastLength: Toast.LENGTH_SHORT,
-        gravity: ToastGravity.CENTER,
-        backgroundColor: Colors.red,
-        textColor: Colors.white,
-        fontSize: 16.0,
-      );
+       getFluttertoastMessage(
+          Colors.green,
+          Colors.white,
+          'Failed to send items.',
+          Toast.LENGTH_LONG,
+          15,
+          ToastGravity.CENTER);
     }
   } catch (e) {
-    Fluttertoast.showToast(
-      msg: 'Failed to send items: $e',
-      toastLength: Toast.LENGTH_SHORT,
-      gravity: ToastGravity.CENTER,
-      backgroundColor: Colors.red,
-      textColor: Colors.white,
-      fontSize: 16.0,
-    );
+    getFluttertoastMessage(
+          Colors.green,
+          Colors.white,
+          'Failed to send items.',
+          Toast.LENGTH_LONG,
+          15,
+          ToastGravity.CENTER);
   }
 }
+
+

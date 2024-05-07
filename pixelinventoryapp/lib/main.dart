@@ -1,15 +1,16 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:pixelinventoryapp/DashBoardcomponetspage.dart';
-import 'package:pixelinventoryapp/Registerpage.dart';
-import 'package:pixelinventoryapp/Forgotpasswordpage.dart';
-import 'package:pixelinventoryapp/apiCommunication/api_communication.dart';
-import 'package:pixelinventoryapp/common/common.dart';
+import 'package:pixelinventoryapp/page_register.dart';
+import 'package:pixelinventoryapp/page_forgot_password.dart';
+import 'package:pixelinventoryapp/apiCommunication/page_api_communication.dart';
+import 'package:pixelinventoryapp/page_dashboard_componets.dart';
+import 'package:pixelinventoryapp/common/Page_common.dart';
 
 void main() {
   runApp(const MyApp());
 }
+
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
@@ -38,45 +39,37 @@ class _MyHomePageState extends State<MyHomePage> {
       TextEditingController(text: '@pixelexpert.net');
   final TextEditingController _passwordController = TextEditingController();
 
+  // Future<void> login1() async {
+  //   final String email = _emailController.text;
+  //   Navigator.push(
+  //     context,
+  //     MaterialPageRoute(
+  //       builder: (context) => DashBoard(email: email),
+  //     ),
+  //   );
+  // }
+
   Future<void> login() async {
     final String email = _emailController.text;
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => DashBoard(email: email),
-      ),
-    );
-  }
-
-  Future<void> login1() async {
-    final String email = _emailController.text;
     final String password = _passwordController.text;
-
-    // final nameLen = email.indexOf('@pixelexpert.net');
-    //var result = email.substring(0, nameLen);
-
     if (!email.contains('@pixelexpert.net') || email.split('@')[0].isEmpty) {
-      Fluttertoast.showToast(
-        msg: 'Please enter a valid Pixel email ID',
-        toastLength: Toast.LENGTH_LONG,
-        gravity: ToastGravity.CENTER,
-        timeInSecForIosWeb: 1,
-        backgroundColor: Colors.red,
-        textColor: Colors.white,
-        fontSize: 16.0,
-      );
+      getFluttertoastMessage(
+          Colors.red,
+          Colors.white,
+          'Please enter a valid Pixel email ID',
+          Toast.LENGTH_LONG,
+          16.0,
+          ToastGravity.CENTER);
       return;
     }
     if (password.isEmpty) {
-      Fluttertoast.showToast(
-        msg: 'Password should not be empty...',
-        toastLength: Toast.LENGTH_LONG,
-        gravity: ToastGravity.CENTER,
-        timeInSecForIosWeb: 1,
-        backgroundColor: Colors.red,
-        textColor: Colors.white,
-        fontSize: 16.0,
-      );
+      getFluttertoastMessage(
+          Colors.red,
+          Colors.white,
+          'Password should not be empty...',
+          Toast.LENGTH_LONG,
+          16.0,
+          ToastGravity.CENTER);
       return;
     }
     Map<String, dynamic> loginInfo;

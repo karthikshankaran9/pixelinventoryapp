@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:pixelinventoryapp/Overalllistdetailspage.dart';
-import 'package:pixelinventoryapp/apiCommunication/api_communication.dart';
-
+import 'package:pixelinventoryapp/page_over_all_list_detail.dart';
+import 'package:pixelinventoryapp/apiCommunication/page_api_communication.dart';
+import 'package:pixelinventoryapp/common/Page_common.dart';
 
 class UserInfoWidget extends StatelessWidget {
   final String name;
@@ -39,7 +39,7 @@ class DashBoard extends StatefulWidget {
 
 class _DashBoardState extends State<DashBoard> {
   List<Map<String, dynamic>> _componentList = [];
-  String? _selectedDeviceOption;
+  ComponentCategory componentCategory = ComponentCategory.programmable; 
   List<String> stringList = [];
   List<String> filteredList = [];
   List<String> selectedItems = [];
@@ -48,22 +48,20 @@ class _DashBoardState extends State<DashBoard> {
   @override
   void initState() {
     super.initState();
-    updateComponentsList('programmablecomponents');
-    _selectedDeviceOption = 'Programmable';
+    updateComponentsList(componentCategory.index);
   }
 
-  void updateComponentsList(String getComponetsAPI) async {
-    _componentList = await getComponentsListFromServer(getComponetsAPI);
+void updateComponentsList(int componentCategory) async {
+  _componentList = await getComponentsListFromServer(componentCategory);
+  setState(() {
+    stringList = _componentList.map((item) => item['c_name'].toString()).toList();
+    filteredList.clear();
+    filteredList.addAll(stringList);
+    _textEditingController.clear();
+  });
+}
 
-    setState(() {
-      stringList =
-          _componentList.map((item) => item['c_name'].toString()).toList();
-      filteredList.clear();
-      filteredList.addAll(stringList);
-    });
-  }
-
-  void add(String item) {
+  void increaseDeviceCount(String item) {
     setState(() {
       if ((quantities[item] ?? 0) <
           _componentList.firstWhere(
@@ -74,7 +72,7 @@ class _DashBoardState extends State<DashBoard> {
     });
   }
 
-  void minus(String item) {
+  void decreaseDeviceCount(String item) {
     setState(() {
       if (quantities[item]! > 0) {
         quantities[item] = (quantities[item]! - 1);
@@ -104,7 +102,7 @@ class _DashBoardState extends State<DashBoard> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: const Text("Delete Confirmation"),
+          title: const Text("Remove Confirmation"),
           content: const Text(
               "Are you sure you want to remove this item from the selected list?"),
           actions: <Widget>[
@@ -182,16 +180,15 @@ class _DashBoardState extends State<DashBoard> {
             },
           ),
           actions: [
-    //Positioned(
-     // top: 30,
-      //left: 200,
-    //  child: 
-      UserInfoWidget(
-        name: 'karthik',
-        email: widget.email,
-      ),
-    //),
-  ],
+           Positioned(
+            top: 15,
+            right: 100,
+            child: UserInfoWidget(
+            name: '',
+            email: widget.email,
+            ),
+           ),
+         ],
         ),
         body: Align(
           child: Container(
@@ -204,50 +201,56 @@ class _DashBoardState extends State<DashBoard> {
               children: [
                 Positioned(
                   top: 15,
-                  left: 15,
+                  left: 20,
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
                       Tooltip(
                         message:
-                            "Click here to view the programmable components",
+                            "Click this to view the programmable components",
                         child: ElevatedButton(
                           onPressed: () {
-                            _selectedDeviceOption = 'Programmable';
-                            updateComponentsList('programmablecomponents');
+                            setState(() {
+                              componentCategory =
+                                  ComponentCategory.programmable;
+                            });
+                           updateComponentsList(ComponentCategory.programmable.index);
                           },
-                          child: Text(
+                          style: ElevatedButton.styleFrom(
+                            fixedSize: const Size(200, 50),
+                            backgroundColor: componentCategory ==
+                                    ComponentCategory.programmable
+                                ? Colors.green
+                                : null,
+                          ),
+                          child: const Text(
                             'Programmable',
                             style: TextStyle(color: Colors.black),
-                          ),
-                          style: ElevatedButton.styleFrom(
-                            fixedSize: Size(200, 50),
-                            backgroundColor:
-                                _selectedDeviceOption == 'Programmable'
-                                    ? Colors.green
-                                    : null,
                           ),
                         ),
                       ),
                       const SizedBox(width: 30),
                       Tooltip(
                         message:
-                            "Click here to view the non-programmable components",
+                            "Click this to view the non-programmable components",
                         child: ElevatedButton(
                           onPressed: () {
-                            _selectedDeviceOption = 'Non Programmable';
-                            updateComponentsList('nonprogrammablecomponents');
+                            setState(() {
+                              componentCategory =
+                                  ComponentCategory.nonprogrammable;
+                            });
+                            updateComponentsList(ComponentCategory.nonprogrammable.index);
                           },
-                          child: Text(
+                          style: ElevatedButton.styleFrom(
+                            fixedSize: const Size(200, 50),
+                            backgroundColor: componentCategory ==
+                                    ComponentCategory.nonprogrammable
+                                ? Colors.green
+                                : null,
+                          ),
+                          child: const Text(
                             'Non-Programmable',
                             style: TextStyle(color: Colors.black),
-                          ),
-                          style: ElevatedButton.styleFrom(
-                            fixedSize: Size(200, 50),
-                            backgroundColor:
-                                _selectedDeviceOption == 'Non Programmable'
-                                    ? Colors.green
-                                    : null,
                           ),
                         ),
                       ),
@@ -258,17 +261,17 @@ class _DashBoardState extends State<DashBoard> {
                   top: 15,
                   right: 15,
                   child: Tooltip(
-                    message: "Click here to view the Overall components list",
+                    message: "Click this to view the Overall components list",
                     child: ElevatedButton(
                       style: ButtonStyle(
                         backgroundColor:
                             MaterialStateProperty.all<Color>(Colors.green),
                       ),
-                      onPressed: () {
+                      onPressed: () async{       
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => Overalllist(),
+                             builder: (context) => Overalllist(),
                           ),
                         );
                       },
@@ -346,33 +349,33 @@ class _DashBoardState extends State<DashBoard> {
                               child: Row(
                                 children: [
                                   Chip(
-                                    label: Text(
-                                      item.length > 15
-                                          ? item.substring(0, 15)
-                                          : item,
-                                      textAlign: TextAlign
-                                          .left, // Ensure text is left-aligned
-                                    ),
-                                    deleteIcon: const Icon(Icons.delete),
-                                    deleteButtonTooltipMessage:
-                                        "Click this to delete the item from the selected list",
-                                    onDeleted: () {
-                                      removeFromSelectedList(item);
-                                    },
+                                  label: SizedBox(width: 100,
+                                  child: Text(
+                                  item.length > 15 ? item.substring(0, 15) : item,
+                                  textAlign: TextAlign.left,
+                                  overflow: TextOverflow.ellipsis, 
+                                   ),
                                   ),
-                                  SizedBox(width: 5),
-                                  Text(
+                                 deleteIcon: const Icon(Icons.delete),
+                                 deleteButtonTooltipMessage:
+                                 "Click this to delete the item from the selected list",
+                                  onDeleted: () {
+                                  removeFromSelectedList(item);
+                                  },
+                                 ),
+                                  const SizedBox(width: 5),
+                                  const Text(
                                     ("Status: Available"),
                                     style: TextStyle(
                                         color: Colors.white, fontSize: 15),
                                   ),
-                                  SizedBox(width: 10),
+                                  const SizedBox(width: 10),
                                   IconButton(
                                     icon: const Icon(Icons.remove),
                                     color:
                                         const Color.fromARGB(255, 229, 30, 15),
                                     onPressed: () {
-                                      minus(item);
+                                      decreaseDeviceCount(item);
                                     },
                                     iconSize: 20,
                                   ),
@@ -386,7 +389,7 @@ class _DashBoardState extends State<DashBoard> {
                                     color:
                                         const Color.fromARGB(255, 228, 37, 24),
                                     onPressed: () {
-                                      add(item);
+                                      increaseDeviceCount(item);
                                     },
                                     iconSize: 20,
                                   ),
@@ -404,7 +407,8 @@ class _DashBoardState extends State<DashBoard> {
                   child: Row(
                     children: [
                       Tooltip(
-                        message: "Click here to view the Remove All Items",
+                        message:
+                            "Click this to Remove All Items",
                         child: ElevatedButton(
                           onPressed: () {
                             removeAllItems();
@@ -428,21 +432,12 @@ class _DashBoardState extends State<DashBoard> {
                   child: Row(
                     children: [
                       Tooltip(
-                        message: "Click here to Submit",
+                        message: "Click this to send an email",
                         child: ElevatedButton(
                           onPressed: () {
                             sendSelectedItems(widget.email, selectedItems,
-                                quantities); // Send the data to the backend
+                                quantities); 
                           },
-                          // getFluttertoastMessage(
-                          //   Colors.black,
-                          //   Colors.white,
-                          //   "Successfully submitted",
-                          //   Toast.LENGTH_LONG,
-                          //   16.0,
-                          //   //ToastGravity.TOP,);
-                          //   ToastGravity.CENTER,
-                          // );
                           style: ButtonStyle(
                             backgroundColor:
                                 MaterialStateProperty.all<Color>(Colors.green),
