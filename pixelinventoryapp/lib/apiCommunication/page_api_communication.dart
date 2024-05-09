@@ -83,12 +83,12 @@ Future<List<Map<String, dynamic>>> getComponentsListFromServer(
   }
 }
 
-Future<void> sendSelectedItems(String name, List<String> selectedItems,
-    Map<String, int> quantities) async {
+Future<void> sendSelectedItems(
+    String name, Map<String, int> mapCompnentList) async {
   Map<String, dynamic> payload = {
     'name': name,
     'subject': 'Component Request',
-    'body': selectedItems,
+    'body': mapCompnentList.keys.toList(),
   };
 
   var jsonPayload = json.encode(payload);

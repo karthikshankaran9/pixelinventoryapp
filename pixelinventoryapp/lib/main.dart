@@ -39,17 +39,17 @@ class _MyHomePageState extends State<MyHomePage> {
       TextEditingController(text: '@pixelexpert.net');
   final TextEditingController _passwordController = TextEditingController();
 
-  // Future<void> login1() async {
-  //   final String email = _emailController.text;
-  //   Navigator.push(
-  //     context,
-  //     MaterialPageRoute(
-  //       builder: (context) => DashBoard(email: email),
-  //     ),
-  //   );
-  // }
-
   Future<void> login() async {
+    final String email = _emailController.text;
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => DashBoard(email: email),
+      ),
+    );
+  }
+
+  Future<void> login1() async {
     final String email = _emailController.text;
     final String password = _passwordController.text;
     if (!email.contains('@pixelexpert.net') || email.split('@')[0].isEmpty) {

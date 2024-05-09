@@ -39,63 +39,97 @@ class DashBoard extends StatefulWidget {
 
 class _DashBoardState extends State<DashBoard> {
   List<Map<String, dynamic>> _componentList = [];
-  ComponentCategory componentCategory = ComponentCategory.programmable; 
-  List<String> stringList = [];
-  List<String> filteredList = [];
-  List<String> selectedItems = [];
-  Map<String, int> quantities = {};
-  TextEditingController _textEditingController = TextEditingController();
+  ComponentCategory componentCategory = ComponentCategory.programmable;
+  List<String> lstComponentNames = [];
+  List<String> lstFilteredComponentNames = [];
+  Map<String, int> mapCompnentList = {};
+  Map<String, int> mapSelectedCompnentList = {};
+  final TextEditingController _textEditingController = TextEditingController();
+ // final ScrollController _listScrollController = ScrollController();
+
   @override
   void initState() {
     super.initState();
     updateComponentsList(componentCategory.index);
   }
 
-void updateComponentsList(int componentCategory) async {
-  _componentList = await getComponentsListFromServer(componentCategory);
-  setState(() {
-    stringList = _componentList.map((item) => item['c_name'].toString()).toList();
-    filteredList.clear();
-    filteredList.addAll(stringList);
-    _textEditingController.clear();
-  });
-}
+  void updateComponentsList(int componentCategory) async {
+    _componentList = await getComponentsListFromServer(componentCategory);
+    setState(() {
+      mapCompnentList = {
+        for (var item in _componentList)
+          item['c_name'].toString(): item['no_of_counts']
+      };
+
+      lstComponentNames = mapCompnentList.keys.toList();
+
+      lstFilteredComponentNames.clear();
+      lstFilteredComponentNames.addAll(lstComponentNames);
+      _textEditingController.clear();
+      //scrollToBottom(); // Scroll to bottom after updating the list
+    });
+  }
+
+  // void scrollToBottom() {
+  //   _listScrollController.jumpTo(_listScrollController.position.maxScrollExtent);
+  // }
 
   void increaseDeviceCount(String item) {
     setState(() {
-      if ((quantities[item] ?? 0) <
-          _componentList.firstWhere(
-            (element) => element['c_name'] == item,
-          )['no_of_counts']) {
-        quantities[item] = (quantities[item] ?? 0) + 1;
-      }
+      if ((mapSelectedCompnentList[item] ?? 0) < mapCompnentList[item]!) {
+        mapSelectedCompnentList[item] =
+            (mapSelectedCompnentList[item] ?? 0) + 1;
+      }else {
+      showMaxCountPopup  ("$item");
+     }
     });
   }
+
+   void showMaxCountPopup(String item) {
+  showDialog(
+    context: context,
+    builder: (BuildContext context) {
+      return AlertDialog(
+        title:const Text("Maximum Count Reached"),
+        content: Text("You have reached the maximum available count for $item."),
+        actions: <Widget>[
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
+            child:const Text("OK"),
+          ),
+        ],
+      );
+    },
+  );
+}
 
   void decreaseDeviceCount(String item) {
     setState(() {
-      if (quantities[item]! > 0) {
-        quantities[item] = (quantities[item]! - 1);
+      if (mapSelectedCompnentList[item]! > 0) {
+        mapSelectedCompnentList[item] = (mapSelectedCompnentList[item]! - 1);
       }
     });
   }
 
-  void filterList(String query) {
+  void addComponentToFilterList(String query) {
     setState(() {
-      filteredList = stringList.where((element) {
+      lstFilteredComponentNames = lstComponentNames.where((element) {
         return element.toLowerCase().contains(query.toLowerCase());
       }).toList();
     });
   }
 
-  void addToSelectedList(String item) {
-    if (!selectedItems.contains(item)) {
+  void addComponentToSelectedList(String item) {
+    if (!mapSelectedCompnentList.containsKey(item)) {
       setState(() {
-        selectedItems.add(item);
-        quantities[item] = 1;
+        mapSelectedCompnentList[item] = 1;
       });
     }
   }
+
+
 
   void removeFromSelectedList(String item) {
     showDialog(
@@ -115,8 +149,7 @@ void updateComponentsList(int componentCategory) async {
             TextButton(
               onPressed: () {
                 setState(() {
-                  selectedItems.remove(item);
-                  quantities.remove(item);
+                  mapSelectedCompnentList.remove(item);
                 });
                 Navigator.of(context).pop();
               },
@@ -146,8 +179,7 @@ void updateComponentsList(int componentCategory) async {
             TextButton(
               onPressed: () {
                 setState(() {
-                  selectedItems.clear();
-                  quantities.clear();
+                  mapSelectedCompnentList.clear();
                 });
                 Navigator.of(context).pop();
               },
@@ -180,15 +212,15 @@ void updateComponentsList(int componentCategory) async {
             },
           ),
           actions: [
-           Positioned(
-            top: 15,
-            right: 100,
-            child: UserInfoWidget(
-            name: '',
-            email: widget.email,
+            Positioned(
+              top: 15,
+              right: 100,
+              child: UserInfoWidget(
+                name: '',
+                email: widget.email,
+              ),
             ),
-           ),
-         ],
+          ],
         ),
         body: Align(
           child: Container(
@@ -214,7 +246,8 @@ void updateComponentsList(int componentCategory) async {
                               componentCategory =
                                   ComponentCategory.programmable;
                             });
-                           updateComponentsList(ComponentCategory.programmable.index);
+                            updateComponentsList(
+                                ComponentCategory.programmable.index);
                           },
                           style: ElevatedButton.styleFrom(
                             fixedSize: const Size(200, 50),
@@ -239,7 +272,8 @@ void updateComponentsList(int componentCategory) async {
                               componentCategory =
                                   ComponentCategory.nonprogrammable;
                             });
-                            updateComponentsList(ComponentCategory.nonprogrammable.index);
+                            updateComponentsList(
+                                ComponentCategory.nonprogrammable.index);
                           },
                           style: ElevatedButton.styleFrom(
                             fixedSize: const Size(200, 50),
@@ -267,11 +301,11 @@ void updateComponentsList(int componentCategory) async {
                         backgroundColor:
                             MaterialStateProperty.all<Color>(Colors.green),
                       ),
-                      onPressed: () async{       
+                      onPressed: () async {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                             builder: (context) => Overalllist(),
+                            builder: (context) => Overalllist(),
                           ),
                         );
                       },
@@ -291,7 +325,7 @@ void updateComponentsList(int componentCategory) async {
                       child: TextField(
                         controller: _textEditingController,
                         onChanged: (value) {
-                          filterList(value);
+                          addComponentToFilterList(value);
                         },
                         decoration: const InputDecoration(
                           labelText: 'Search',
@@ -316,17 +350,20 @@ void updateComponentsList(int componentCategory) async {
                     height: MediaQuery.of(context).size.height - 150,
                     width: MediaQuery.of(context).size.width - 30,
                     child: ListView.builder(
-                      itemCount: filteredList.length,
+                     //controller: _listScrollController,
+                      itemCount: lstFilteredComponentNames.length,
                       itemBuilder: (context, index) {
-                        final component = _componentList.firstWhere((element) =>
-                            element['c_name'] == filteredList[index]);
                         return ListTile(
-                          title: Text(filteredList[index]),
-                          subtitle: Text('Count: ${component['no_of_counts']}'),
+                          title: Text(lstFilteredComponentNames[index]),
+                          subtitle: Text(
+                              'Count: ${mapCompnentList[lstFilteredComponentNames[index]]}'),
                           onTap: () {
                             setState(() {
-                              _textEditingController.text = filteredList[index];
-                              addToSelectedList(filteredList[index]);
+                              _textEditingController.text =
+                                  lstFilteredComponentNames[index];
+                              addComponentToSelectedList(
+                                  lstFilteredComponentNames[index]);
+                              //scrollToBottom();
                             });
                           },
                         );
@@ -338,31 +375,35 @@ void updateComponentsList(int componentCategory) async {
                   top: 100,
                   right: 30,
                   child: Container(
-                    height: 500,
+                    height: 400,
                     child: SingleChildScrollView(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.end,
                         children: [
-                          for (var item in selectedItems)
+                          for (var item
+                              in mapSelectedCompnentList.keys.toList())
                             Padding(
                               padding: const EdgeInsets.all(8.0),
                               child: Row(
                                 children: [
                                   Chip(
-                                  label: SizedBox(width: 100,
-                                  child: Text(
-                                  item.length > 15 ? item.substring(0, 15) : item,
-                                  textAlign: TextAlign.left,
-                                  overflow: TextOverflow.ellipsis, 
-                                   ),
+                                    label: SizedBox(
+                                      width: 100,
+                                      child: Text(
+                                        item.length > 15
+                                            ? item.substring(0, 15)
+                                            : item,
+                                        textAlign: TextAlign.left,
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                    ),
+                                    deleteIcon: const Icon(Icons.delete),
+                                    deleteButtonTooltipMessage:
+                                        "Click this to delete the item from the selected list",
+                                    onDeleted: () {
+                                      removeFromSelectedList(item);
+                                    },
                                   ),
-                                 deleteIcon: const Icon(Icons.delete),
-                                 deleteButtonTooltipMessage:
-                                 "Click this to delete the item from the selected list",
-                                  onDeleted: () {
-                                  removeFromSelectedList(item);
-                                  },
-                                 ),
                                   const SizedBox(width: 5),
                                   const Text(
                                     ("Status: Available"),
@@ -380,7 +421,7 @@ void updateComponentsList(int componentCategory) async {
                                     iconSize: 20,
                                   ),
                                   Text(
-                                    '${quantities[item]}',
+                                    '${mapSelectedCompnentList[item]}',
                                     style: const TextStyle(
                                         color: Colors.white, fontSize: 18),
                                   ),
@@ -407,8 +448,7 @@ void updateComponentsList(int componentCategory) async {
                   child: Row(
                     children: [
                       Tooltip(
-                        message:
-                            "Click this to Remove All Items",
+                        message: "Click this to Remove All Items",
                         child: ElevatedButton(
                           onPressed: () {
                             removeAllItems();
@@ -435,8 +475,7 @@ void updateComponentsList(int componentCategory) async {
                         message: "Click this to send an email",
                         child: ElevatedButton(
                           onPressed: () {
-                            sendSelectedItems(widget.email, selectedItems,
-                                quantities); 
+                            sendSelectedItems(widget.email, mapCompnentList);
                           },
                           style: ButtonStyle(
                             backgroundColor:
@@ -459,3 +498,4 @@ void updateComponentsList(int componentCategory) async {
     );
   }
 }
+
