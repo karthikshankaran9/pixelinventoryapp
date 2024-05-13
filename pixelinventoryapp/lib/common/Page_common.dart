@@ -8,11 +8,11 @@ class GeneralSettings {
 
 class ComponentDetails {
   String componentName = "";
-  String assetId = "";
+  List<String> assetId = [];
   int count = 0;
 
   ComponentDetails(
-      {this.componentName = "", this.assetId = "", this.count = 0});
+      {this.componentName = "", required this.assetId, this.count = 0});
 
   // Convert ComponentDetails to a Map
   Map<String, dynamic> toJson() {
