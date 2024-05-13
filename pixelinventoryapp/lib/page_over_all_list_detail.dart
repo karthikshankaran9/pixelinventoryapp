@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:pixelinventoryapp/apiCommunication/page_api_communication.dart';
-import 'package:pixelinventoryapp/common/Page_common.dart';
+import 'package:pixelinventoryapp/common/page_common.dart';
 
 class Overalllist extends StatefulWidget {
   @override

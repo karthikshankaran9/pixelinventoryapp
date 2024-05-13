@@ -3,12 +3,12 @@
 // import 'package:flutter/material.dart';
 // import 'package:fluttertoast/fluttertoast.dart';
 
-// void sendSelectedItems(String name, List<String> selectedItems,
-//     Map<String, int> quantities) async {
+// Future<void> sendSelectedItems(
+//     String name, Map<String, int> mapSelectedCompnentList) async {
 //   Map<String, dynamic> payload = {
 //     'name': name,
-//     'body': selectedItems.join('       '),
-//     'subject': 'Components Request',
+//     'subject': 'Component Request',
+//     'body':mapSelectedCompnentList.keys.toList(),
 //   };
 
 //   var jsonPayload = json.encode(payload);
