@@ -1,15 +1,14 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:pixelinventoryapp/common/page_common_controls_UI.dart';
-import 'package:pixelinventoryapp/page_register.dart';
-import 'package:pixelinventoryapp/page_forgot_password.dart';
-import 'package:pixelinventoryapp/apiCommunication/page_api_communication.dart';
-import 'package:pixelinventoryapp/page_dashboard_componets.dart';
-import 'package:pixelinventoryapp/page_admin_home.dart';
-import 'package:pixelinventoryapp/common/page_common_controls_UI.dart';
+import 'package:pixelinventoryapp/userPages/page_register.dart';
+import 'package:pixelinventoryapp/userPages/page_forgot_password.dart';
+import 'package:pixelinventoryapp/userPages/page_dashboard_componets.dart';
+import 'package:pixelinventoryapp/adminPages/page_admin_home.dart';
 import 'package:pixelinventoryapp/common/page_data_process.dart';
 import 'package:pixelinventoryapp/common/page_common.dart';
+import 'package:pixelinventoryapp/common/page_common_controls_UI.dart';
+import 'package:pixelinventoryapp/apiCommunication/page_api_communication.dart';
 
 void main() {
   runApp(const MyApp());
@@ -42,7 +41,7 @@ class _MyHomePageState extends State<MyHomePage> {
       TextEditingController(text: '@pixelexpert.net');
   final TextEditingController _passwordController = TextEditingController();
 
-  Future<void> login1() async {    
+  Future<void> login1() async {
     Navigator.push(
       context,
       MaterialPageRoute(
@@ -51,62 +50,62 @@ class _MyHomePageState extends State<MyHomePage> {
     );
   }
 
- Future<void> login() async {
-  final String email = _emailController.text;
-  final String password = _passwordController.text;
-  GeneralSettings generalSettings = GeneralSettings();
-  // Check if email is admin email
+  Future<void> login() async {
+    final String email = _emailController.text;
+    final String password = _passwordController.text;
+    GeneralSettings generalSettings = GeneralSettings();
+    // Check if email is admin email
     if (email == 'nishadh.m@pixelexpert.net') {
       Navigator.push(
         context,
         MaterialPageRoute(
-          builder: (context) =>MailListScreen(),
-           //builder: (context) =>AdminStatusChange(),
+          builder: (context) => MailListScreen(),
+          //builder: (context) =>AdminStatusChange(),
         ),
       );
       return;
     }
-  // Regular login process
-  if (!email.contains('@pixelexpert.net') || email.split('@')[0].isEmpty) {
-    getFluttertoastMessage(
-        Colors.red,
-        Colors.white,
-        'Please enter a valid Pixel email ID',
-        Toast.LENGTH_LONG,
-        16.0,
-        ToastGravity.CENTER);
-    return;
-  }
-  if (password.isEmpty) {
-    getFluttertoastMessage(
-        Colors.red,
-        Colors.white,
-        'Password should not be empty...',
-        Toast.LENGTH_LONG,
-        16.0,
-        ToastGravity.CENTER);
-    return;
-  }
-  Map<String, dynamic> loginInfo;
-  loginInfo = await getLoginInfo(email, password);
+    // Regular login process
+    if (!email.contains('@pixelexpert.net') || email.split('@')[0].isEmpty) {
+      getFluttertoastMessage(
+          Colors.red,
+          Colors.white,
+          'Please enter a valid Pixel email ID',
+          Toast.LENGTH_LONG,
+          16.0,
+          ToastGravity.CENTER);
+      return;
+    }
+    if (password.isEmpty) {
+      getFluttertoastMessage(
+          Colors.red,
+          Colors.white,
+          'Password should not be empty...',
+          Toast.LENGTH_LONG,
+          16.0,
+          ToastGravity.CENTER);
+      return;
+    }
+    Map<String, dynamic> loginInfo;
+    loginInfo = await getLoginInfo(email, password);
 
-  if (loginInfo['success'] == true) {
-    getFluttertoastMessage(Colors.green, Colors.white, 'Login Successful',
-        Toast.LENGTH_LONG, 15, ToastGravity.CENTER);
+    if (loginInfo['success'] == true) {
+      getFluttertoastMessage(Colors.green, Colors.white, 'Login Successful',
+          Toast.LENGTH_LONG, 15, ToastGravity.CENTER);
 
       generalSettings.email = email;
       setGeneralSettings(generalSettings);
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => DashBoard(),
-      ),
-    );
-  } else {
-    getFluttertoastMessage(Colors.green, Colors.red, loginInfo['message'],
-        Toast.LENGTH_LONG, 15, ToastGravity.CENTER);
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => DashBoard(),
+        ),
+      );
+    } else {
+      getFluttertoastMessage(Colors.green, Colors.red, loginInfo['message'],
+          Toast.LENGTH_LONG, 15, ToastGravity.CENTER);
+    }
   }
-}
 
   bool isPasswordVisible = false;
   @override

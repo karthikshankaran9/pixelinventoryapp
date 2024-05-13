@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import 'main.dart';
+import '../main.dart';
 import 'package:pixelinventoryapp/common/page_common_controls_UI.dart';
 import 'package:pixelinventoryapp/apiCommunication/page_api_communication.dart';
 

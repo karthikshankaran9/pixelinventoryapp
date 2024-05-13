@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:pixelinventoryapp/page_over_all_list_detail.dart';
+import 'package:pixelinventoryapp/userPages/page_over_all_list_detail.dart';
 import 'package:pixelinventoryapp/apiCommunication/page_api_communication.dart';
 import 'package:pixelinventoryapp/common/page_common.dart';
 import 'package:pixelinventoryapp/common/page_data_process.dart';
@@ -57,7 +57,7 @@ class _DashBoardState extends State<DashBoard> {
     _componentList = await getComponentsListFromServer(componentCategory);
     setState(() {
       generalSettings = getGeneralSettings();
-      mapCompnentList.clear();      
+      mapCompnentList.clear();
       for (var item in _componentList) {
         String componentName = item['c_name'].toString();
         if (mapCompnentList.containsKey(componentName)) {
@@ -85,25 +85,14 @@ class _DashBoardState extends State<DashBoard> {
         .jumpTo(_listScrollController.position.maxScrollExtent);
   }
 
-  void increaseDeviceCount(String item) {
-    setState(() {
-      if ((mapSelectedCompnentList[item]!.count) <
-          mapCompnentList[item]!.count) {
-        mapSelectedCompnentList[item]!.count += 1;
-      } else {
-        showMaxCountPopup("$item");
-      }
-    });
-  }
-
-  void showMaxCountPopup(String item) {
+  void showMaxCountPopup(String selectedItem) {
     showDialog(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
           title: const Text("Maximum Count Reached"),
-          content:
-              Text("You have reached the maximum available count for $item."),
+          content: Text(
+              "You have reached the maximum available count for \"$selectedItem\"."),
           actions: <Widget>[
             TextButton(
               onPressed: () {
@@ -117,18 +106,29 @@ class _DashBoardState extends State<DashBoard> {
     );
   }
 
-  void decreaseDeviceCount(String item) {
+  void increaseDeviceCount(String selectedItem) {
     setState(() {
-      if (mapSelectedCompnentList[item]!.count > 0) {
-        mapSelectedCompnentList[item]!.count -= 1;
+      if ((mapSelectedCompnentList[selectedItem]!.count) <
+          mapCompnentList[selectedItem]!.count) {
+        mapSelectedCompnentList[selectedItem]!.count += 1;
+      } else {
+        showMaxCountPopup(selectedItem);
       }
     });
   }
 
-  void addComponentToFilterList(String query) {
+  void decreaseDeviceCount(String selectedItem) {
+    setState(() {
+      if (mapSelectedCompnentList[selectedItem]!.count > 0) {
+        mapSelectedCompnentList[selectedItem]!.count -= 1;
+      }
+    });
+  }
+
+  void addComponentToFilterList(String searchItem) {
     setState(() {
       lstFilteredComponentNames = lstComponentNames.where((element) {
-        return element.toLowerCase().contains(query.toLowerCase());
+        return element.toLowerCase().contains(searchItem.toLowerCase());
       }).toList();
     });
   }

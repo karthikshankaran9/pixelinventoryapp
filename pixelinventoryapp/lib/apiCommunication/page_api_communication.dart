@@ -4,7 +4,6 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:flutter/material.dart';
 import 'package:pixelinventoryapp/common/page_common_controls_UI.dart';
 import 'package:pixelinventoryapp/common/page_data_process.dart';
-import 'package:pixelinventoryapp/common/page_common.dart';
 
 const String rmsWebServerHost = 'http://10.44.100.27:8000';
 const String loginAPI = 'login';
