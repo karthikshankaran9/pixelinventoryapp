@@ -123,8 +123,6 @@
 //     }
 //   }
 
-
-
 //   void removeFromSelectedList(String item) {
 //     showDialog(
 //       context: context,
@@ -494,7 +492,8 @@
 import 'package:flutter/material.dart';
 import 'package:pixelinventoryapp/page_over_all_list_detail.dart';
 import 'package:pixelinventoryapp/apiCommunication/page_api_communication.dart';
-import 'package:pixelinventoryapp/common/Page_common.dart';
+import 'package:pixelinventoryapp/common/page_common.dart';
+import 'package:pixelinventoryapp/common/page_data_process.dart';
 
 class UserInfoWidget extends StatelessWidget {
   final String name;
@@ -524,8 +523,6 @@ class UserInfoWidget extends StatelessWidget {
 }
 
 class DashBoard extends StatefulWidget {
-  final String email;
-  DashBoard({required this.email});
   @override
   _DashBoardState createState() => _DashBoardState();
 }
@@ -535,10 +532,10 @@ class _DashBoardState extends State<DashBoard> {
   ComponentCategory componentCategory = ComponentCategory.programmable;
   List<String> lstComponentNames = [];
   List<String> lstFilteredComponentNames = [];
-  Map<String, int> mapCompnentList = {};
-  Map<String, int> mapSelectedCompnentList = {};
+
   final TextEditingController _textEditingController = TextEditingController();
   final ScrollController _listScrollController = ScrollController();
+  GeneralSettings generalSettings = GeneralSettings();
 
   @override
   void initState() {
@@ -547,39 +544,49 @@ class _DashBoardState extends State<DashBoard> {
   }
 
   void updateComponentsList(int componentCategory) async {
+    ComponentDetails componentDetails = ComponentDetails();
     _componentList = await getComponentsListFromServer(componentCategory);
     setState(() {
-      mapCompnentList = {
-        for (var item in _componentList)
-          item['c_name'].toString(): item['no_of_counts']
-      };
+      generalSettings = getGeneralSettings();
+      // mapCompnentList = {
+      //   for (var item in _componentList)
+      //     item['c_name'].toString(): item['no_of_counts']
+      // };
+
+      for (var item in _componentList) {
+        componentDetails.assetId = item['asset_no'];
+        componentDetails.count = item['no_of_counts'];
+        componentDetails.componentName = item['c_name'].toString();
+        mapCompnentList[item['c_name'].toString()] = componentDetails;
+      }
 
       lstComponentNames = mapCompnentList.keys.toList();
 
       lstFilteredComponentNames.clear();
       lstFilteredComponentNames.addAll(lstComponentNames);
       _textEditingController.clear();
-      scrollToBottom(); // Scroll to bottom after updating the list
+      //scrollToBottom(); // Scroll to bottom after updating the list
     });
   }
 
   void scrollToBottom() {
-    _listScrollController.jumpTo(_listScrollController.position.maxScrollExtent);
+    _listScrollController
+        .jumpTo(_listScrollController.position.maxScrollExtent);
   }
 
   void increaseDeviceCount(String item) {
     setState(() {
-      if ((mapSelectedCompnentList[item] ?? 0) < mapCompnentList[item]!) {
-        mapSelectedCompnentList[item] =
-            (mapSelectedCompnentList[item] ?? 0) + 1;
+      if ((mapSelectedCompnentList[item]!.count) <
+          mapCompnentList[item]!.count) {
+        mapSelectedCompnentList[item]!.count += 1;
       }
     });
   }
 
   void decreaseDeviceCount(String item) {
     setState(() {
-      if (mapSelectedCompnentList[item]! > 0) {
-        mapSelectedCompnentList[item] = (mapSelectedCompnentList[item]! - 1);
+      if (mapSelectedCompnentList[item]!.count > 0) {
+        mapSelectedCompnentList[item]!.count -= 1;
       }
     });
   }
@@ -592,10 +599,22 @@ class _DashBoardState extends State<DashBoard> {
     });
   }
 
-  void addComponentToSelectedList(String item) {
-    if (!mapSelectedCompnentList.containsKey(item)) {
+  void addComponentToSelectedList(String selectedItem) {
+    if (!mapSelectedCompnentList.containsKey(selectedItem)) {
       setState(() {
-        mapSelectedCompnentList[item] = 1;
+        ComponentDetails componentDetails = ComponentDetails();
+        ComponentDetails selectedComponentDetails = ComponentDetails();
+        componentDetails = mapCompnentList[selectedItem]!;
+
+        if (componentDetails.count > 0) {
+          selectedComponentDetails.count = 1;
+        } else {
+          selectedComponentDetails.count = 0;
+        }
+
+        selectedComponentDetails.assetId = componentDetails.assetId;
+        selectedComponentDetails.componentName = componentDetails.componentName;
+        mapSelectedCompnentList[selectedItem] = selectedComponentDetails;
       });
     }
   }
@@ -617,7 +636,6 @@ class _DashBoardState extends State<DashBoard> {
 //     );
 //   }
 // }
-
 
   void removeFromSelectedList(String item) {
     showDialog(
@@ -705,7 +723,7 @@ class _DashBoardState extends State<DashBoard> {
               right: 100,
               child: UserInfoWidget(
                 name: '',
-                email: widget.email,
+                email: generalSettings.email,
               ),
             ),
           ],
@@ -838,13 +856,13 @@ class _DashBoardState extends State<DashBoard> {
                     height: MediaQuery.of(context).size.height - 150,
                     width: MediaQuery.of(context).size.width - 30,
                     child: ListView.builder(
-                     //controller: _listScrollController,
+                      //controller: _listScrollController,
                       itemCount: lstFilteredComponentNames.length,
                       itemBuilder: (context, index) {
                         return ListTile(
                           title: Text(lstFilteredComponentNames[index]),
                           subtitle: Text(
-                              'Count: ${mapCompnentList[lstFilteredComponentNames[index]]}'),
+                              'Count: ${mapCompnentList[lstFilteredComponentNames[index]]!.count}'),
                           onTap: () {
                             setState(() {
                               _textEditingController.text =
@@ -909,7 +927,7 @@ class _DashBoardState extends State<DashBoard> {
                                     iconSize: 20,
                                   ),
                                   Text(
-                                    '${mapSelectedCompnentList[item]}',
+                                    '${mapSelectedCompnentList[item]!.count}',
                                     style: const TextStyle(
                                         color: Colors.white, fontSize: 18),
                                   ),
@@ -963,7 +981,7 @@ class _DashBoardState extends State<DashBoard> {
                         message: "Click this to send an email",
                         child: ElevatedButton(
                           onPressed: () {
-                            sendSelectedItems(widget.email, mapCompnentList);
+                            sendSelectedItems();
                           },
                           style: ButtonStyle(
                             backgroundColor:
@@ -986,4 +1004,3 @@ class _DashBoardState extends State<DashBoard> {
     );
   }
 }
-

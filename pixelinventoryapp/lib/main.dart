@@ -5,12 +5,13 @@ import 'package:pixelinventoryapp/page_register.dart';
 import 'package:pixelinventoryapp/page_forgot_password.dart';
 import 'package:pixelinventoryapp/apiCommunication/page_api_communication.dart';
 import 'package:pixelinventoryapp/page_dashboard_componets.dart';
-import 'package:pixelinventoryapp/common/Page_common.dart';
+import 'package:pixelinventoryapp/common/page_common_controls_UI.dart';
+import 'package:pixelinventoryapp/common/page_data_process.dart';
+import 'package:pixelinventoryapp/common/page_common.dart';
 
 void main() {
   runApp(const MyApp());
 }
-
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
@@ -39,19 +40,20 @@ class _MyHomePageState extends State<MyHomePage> {
       TextEditingController(text: '@pixelexpert.net');
   final TextEditingController _passwordController = TextEditingController();
 
-  Future<void> login() async {
-    final String email = _emailController.text;
+  Future<void> login1() async {    
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => DashBoard(email: email),
+        builder: (context) => DashBoard(),
       ),
     );
   }
 
-  Future<void> login1() async {
+  Future<void> login() async {
     final String email = _emailController.text;
     final String password = _passwordController.text;
+
+    GeneralSettings generalSettings = GeneralSettings();
     if (!email.contains('@pixelexpert.net') || email.split('@')[0].isEmpty) {
       getFluttertoastMessage(
           Colors.red,
@@ -79,10 +81,12 @@ class _MyHomePageState extends State<MyHomePage> {
       getFluttertoastMessage(Colors.green, Colors.white, 'Login Successful',
           Toast.LENGTH_LONG, 15, ToastGravity.CENTER);
 
+      generalSettings.email = email;
+      setGeneralSettings(generalSettings);
       Navigator.push(
         context,
         MaterialPageRoute(
-          builder: (context) => DashBoard(email: email),
+          builder: (context) => DashBoard(),
         ),
       );
     } else {
