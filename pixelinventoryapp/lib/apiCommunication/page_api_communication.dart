@@ -72,10 +72,10 @@ Future<List<Map<String, dynamic>>> getComponentsListFromServer(
 
   final response = await http.post(
     Uri.parse('$rmsWebServerHost/$getComponentListAPI'),
-    headers: {
-      "Content-Type": "application/json", 
-    },
-    body: jsonEncode(reqBody), 
+    // headers: {
+    //   "Content-Type": "application/json",
+    // },
+    body: jsonEncode(reqBody),
   );
 
   if (response.statusCode == 200) {

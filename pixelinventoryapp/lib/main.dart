@@ -6,14 +6,17 @@ import 'package:pixelinventoryapp/page_register.dart';
 import 'package:pixelinventoryapp/page_forgot_password.dart';
 import 'package:pixelinventoryapp/apiCommunication/page_api_communication.dart';
 import 'package:pixelinventoryapp/page_dashboard_componets.dart';
+<<<<<<< HEAD
 import 'package:pixelinventoryapp/page_admin_home.dart';
+=======
+import 'package:pixelinventoryapp/common/page_common_controls_UI.dart';
+>>>>>>> 31c0b17b4ad1f39e48f6716969daf0c4984ad92b
 import 'package:pixelinventoryapp/common/page_data_process.dart';
 import 'package:pixelinventoryapp/common/page_common.dart';
 
 void main() {
   runApp(const MyApp());
 }
-
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
@@ -42,8 +45,12 @@ class _MyHomePageState extends State<MyHomePage> {
       TextEditingController(text: '@pixelexpert.net');
   final TextEditingController _passwordController = TextEditingController();
 
+<<<<<<< HEAD
   Future<void> login1() async {
     final String email = _emailController.text;
+=======
+  Future<void> login1() async {    
+>>>>>>> 31c0b17b4ad1f39e48f6716969daf0c4984ad92b
     Navigator.push(
       context,
       MaterialPageRoute(
@@ -52,6 +59,7 @@ class _MyHomePageState extends State<MyHomePage> {
     );
   }
 
+<<<<<<< HEAD
  Future<void> login() async {
   final String email = _emailController.text;
   final String password = _passwordController.text;
@@ -63,6 +71,46 @@ class _MyHomePageState extends State<MyHomePage> {
         MaterialPageRoute(
           builder: (context) =>MailListScreen(),
            //builder: (context) =>AdminStatusChange(),
+=======
+  Future<void> login() async {
+    final String email = _emailController.text;
+    final String password = _passwordController.text;
+
+    GeneralSettings generalSettings = GeneralSettings();
+    if (!email.contains('@pixelexpert.net') || email.split('@')[0].isEmpty) {
+      getFluttertoastMessage(
+          Colors.red,
+          Colors.white,
+          'Please enter a valid Pixel email ID',
+          Toast.LENGTH_LONG,
+          16.0,
+          ToastGravity.CENTER);
+      return;
+    }
+    if (password.isEmpty) {
+      getFluttertoastMessage(
+          Colors.red,
+          Colors.white,
+          'Password should not be empty...',
+          Toast.LENGTH_LONG,
+          16.0,
+          ToastGravity.CENTER);
+      return;
+    }
+    Map<String, dynamic> loginInfo;
+    loginInfo = await getLoginInfo(email, password);
+
+    if (loginInfo['success'] == true) {
+      getFluttertoastMessage(Colors.green, Colors.white, 'Login Successful',
+          Toast.LENGTH_LONG, 15, ToastGravity.CENTER);
+
+      generalSettings.email = email;
+      setGeneralSettings(generalSettings);
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => DashBoard(),
+>>>>>>> 31c0b17b4ad1f39e48f6716969daf0c4984ad92b
         ),
       );
       return;
