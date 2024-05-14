@@ -53,22 +53,26 @@ class _DashBoardState extends State<DashBoard> {
   }
 
   void updateComponentsList(int componentCategory) async {
-    ComponentDetails componentDetails = ComponentDetails(assetId: []);
+    ComponentDetails componentDetails =
+        ComponentDetails(availableAssetIds: [], selectedAssetIds: []);
     _componentList = await getComponentsListFromServer(componentCategory);
     setState(() {
       generalSettings = getGeneralSettings();
       mapCompnentList.clear();
       for (var item in _componentList) {
         String componentName = item['c_name'].toString();
+        String componentStatus = item['status'].toString(); // Added line
         if (mapCompnentList.containsKey(componentName)) {
           componentDetails = mapCompnentList[componentName]!;
         } else {
-          componentDetails = ComponentDetails(assetId: []);
+          componentDetails =
+              ComponentDetails(availableAssetIds: [], selectedAssetIds: []);
         }
 
-        componentDetails.assetId.add(item['asset_no'].toString());
+        componentDetails.availableAssetIds.add(item['asset_no'].toString());
         componentDetails.count += 1;
         componentDetails.componentName = componentName;
+        componentDetails.status = componentStatus; // Added line
         mapCompnentList[componentName] = componentDetails;
       }
 
@@ -110,7 +114,14 @@ class _DashBoardState extends State<DashBoard> {
     setState(() {
       if ((mapSelectedCompnentList[selectedItem]!.count) <
           mapCompnentList[selectedItem]!.count) {
-        mapSelectedCompnentList[selectedItem]!.count += 1;
+        ComponentDetails selectedComponentDetails =
+            ComponentDetails(availableAssetIds: [], selectedAssetIds: []);
+        selectedComponentDetails = mapSelectedCompnentList[selectedItem]!;
+
+        selectedComponentDetails.selectedAssetIds.add(selectedComponentDetails
+            .availableAssetIds[selectedComponentDetails.count]);
+        selectedComponentDetails.count += 1;
+        mapSelectedCompnentList[selectedItem] = selectedComponentDetails;
       } else {
         showMaxCountPopup(selectedItem);
       }
@@ -120,7 +131,15 @@ class _DashBoardState extends State<DashBoard> {
   void decreaseDeviceCount(String selectedItem) {
     setState(() {
       if (mapSelectedCompnentList[selectedItem]!.count > 0) {
-        mapSelectedCompnentList[selectedItem]!.count -= 1;
+        ComponentDetails selectedComponentDetails =
+            ComponentDetails(availableAssetIds: [], selectedAssetIds: []);
+        selectedComponentDetails = mapSelectedCompnentList[selectedItem]!;
+
+        selectedComponentDetails.count -= 1;
+        selectedComponentDetails.selectedAssetIds
+            .removeAt(selectedComponentDetails.count);
+
+        mapSelectedCompnentList[selectedItem] = selectedComponentDetails;
       }
     });
   }
@@ -136,19 +155,26 @@ class _DashBoardState extends State<DashBoard> {
   void addComponentToSelectedList(String selectedItem) {
     if (!mapSelectedCompnentList.containsKey(selectedItem)) {
       setState(() {
-        ComponentDetails componentDetails = ComponentDetails(assetId: []);
+        ComponentDetails componentDetails =
+            ComponentDetails(availableAssetIds: [], selectedAssetIds: []);
         ComponentDetails selectedComponentDetails =
-            ComponentDetails(assetId: []);
+            ComponentDetails(availableAssetIds: [], selectedAssetIds: []);
         componentDetails = mapCompnentList[selectedItem]!;
+
+        if (componentDetails.availableAssetIds.isNotEmpty) {
+          selectedComponentDetails.selectedAssetIds.add(componentDetails
+              .availableAssetIds[selectedComponentDetails.count]);
+        }
 
         if (componentDetails.count > 0) {
           selectedComponentDetails.count = 1;
         } else {
           selectedComponentDetails.count = 0;
         }
-
-        selectedComponentDetails.assetId = componentDetails.assetId;
         selectedComponentDetails.componentName = componentDetails.componentName;
+        selectedComponentDetails.availableAssetIds =
+            componentDetails.availableAssetIds;
+            selectedComponentDetails.status = componentDetails.status;
         mapSelectedCompnentList[selectedItem] = selectedComponentDetails;
       });
     }
@@ -426,11 +452,11 @@ class _DashBoardState extends State<DashBoard> {
                                     },
                                   ),
                                   const SizedBox(width: 5),
-                                  const Text(
-                                    ("Status: Available"),
-                                    style: TextStyle(
+                                  Text(
+                                    ("Status: ${mapSelectedCompnentList[item]!.status}"), // Updated line
+                                    style: const TextStyle(
                                         color: Colors.white, fontSize: 15),
-                                  ),
+                                  ), 
                                   const SizedBox(width: 10),
                                   IconButton(
                                     icon: const Icon(Icons.remove),

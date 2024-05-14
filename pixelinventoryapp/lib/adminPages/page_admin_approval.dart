@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
-import 'dart:convert';
+import 'package:pixelinventoryapp/apiCommunication/page_api_communication.dart';
 
 class AdminDetailScreen extends StatefulWidget {
   final String title;
@@ -20,55 +19,25 @@ class AdminDetailScreen extends StatefulWidget {
 
 class _AdminDetailScreenState extends State<AdminDetailScreen> {
   List<Map<String, dynamic>> data = [];
-  String selectedStatus = 'Use';
+  late List<String> selectedStatusList; 
 
   @override
   void initState() {
     super.initState();
-    fetchData();
+    fetchDataFromServer();
   }
 
-  Future<void> fetchData() async {
-    final Uri url = Uri.parse('http://10.44.100.27:8000/admindashboard');
-    final response = await http.get(url);
-
-    if (response.statusCode == 200) {
-      List<dynamic> responseBody = jsonDecode(response.body);
+  Future<void> fetchDataFromServer() async {
+    try {
+      List<Map<String, dynamic>> responseData = await adminApprovalFetchData();
       setState(() {
-        data = responseBody.cast<Map<String, dynamic>>();
+        data = responseData;
+        selectedStatusList = List<String>.filled(data.length, 'Use'); // Initialize selectedStatusList
       });
-    } else {
-      throw Exception('Failed to load data');
+    } catch (e) {
+      print('Error fetching data: $e');
     }
   }
-  
-  // Future<void> updateAdminStatus(List<Map<String, dynamic>> componentsDetails) async {
-  //   final String apiUrl = 'http://10.44.100.27:8000/admin_status_change';
-
-  //   try {
-  //     // Prepare data
-  //     Map<String, dynamic> requestData = {'components_details': componentsDetails};
-  //     String requestBody = jsonEncode(requestData);
-
-  //     // Send POST request
-  //     final http.Response response = await http.post(
-  //       Uri.parse(apiUrl),
-  //       headers: <String, String>{
-  //         'Content-Type': 'application/json; charset=UTF-8',
-  //       },
-  //       body: requestBody,
-  //     );
-
-  //     // Check response status
-  //     if (response.statusCode == 200) {
-  //       print('Update successful');
-  //     } else {
-  //       print('Failed to update: ${response.reasonPhrase}');
-  //     }
-  //   } catch (e) {
-  //     print('Error: $e');
-  //   }
-  // }
 
   @override
   Widget build(BuildContext context) {
@@ -105,16 +74,16 @@ class _AdminDetailScreenState extends State<AdminDetailScreen> {
                 children: [
                   Text(
                     "From: ${widget.sender}",
-                    style: const TextStyle(height: 3.0,fontSize: 15.2,fontWeight: FontWeight.bold,color: Colors.black,),
+                    style: const TextStyle(height: 3.0, fontSize: 15.2, fontWeight: FontWeight.bold, color: Colors.black),
                   ),
                   Text(
                     widget.body,
-                    style: const TextStyle(height: 3.0,fontSize: 15.2,color: Colors.black,),
+                    style: const TextStyle(height: 3.0, fontSize: 15.2, color: Colors.black),
                   ),
                 ],
               ),
             ),
-           const Padding(
+            const Padding(
               padding: const EdgeInsets.all(8.0),
               child: Row(
                 children: <Widget>[
@@ -155,27 +124,27 @@ class _AdminDetailScreenState extends State<AdminDetailScreen> {
                         ),
                         Expanded(
                           flex: 2,
-                          child:Column(
-                           crossAxisAlignment: CrossAxisAlignment.stretch,
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
                             children: [
-                             DropdownButtonFormField<String>(
-                            value: selectedStatus,
-                            onChanged: (String? newValue) {
-                             setState(() {
-                             selectedStatus = newValue!;
-                             });
-                            },
-                           items: <String>['Use', 'Not Working', ' Available']
-                           .map<DropdownMenuItem<String>>((String value) {
-                            return DropdownMenuItem<String>(
-                            value: value,
-                            child: Text(value),
-                            );
-                           }).toList(),
-                          decoration: InputDecoration(labelText: 'Status'),
+                              DropdownButtonFormField<String>(
+                                value: selectedStatusList[index],
+                                onChanged: (String? newValue) {
+                                  setState(() {
+                                    selectedStatusList[index] = newValue ?? selectedStatusList[index];
+                                  });
+                                },
+                                items: <String>['Use', 'Not Working', 'Available']
+                                    .map<DropdownMenuItem<String>>((String value) {
+                                  return DropdownMenuItem<String>(
+                                    value: value,
+                                    child: Text(value),
+                                  );
+                                }).toList(),
+                                decoration: InputDecoration(labelText: 'Status'),
+                              ),
+                            ],
                           ),
-                         ],
-                         ),
                         ),
                         Expanded(
                           flex: 2,
@@ -191,7 +160,7 @@ class _AdminDetailScreenState extends State<AdminDetailScreen> {
               padding: const EdgeInsets.all(8.0),
               child: Text(
                 "Regards: ${widget.sender}",
-                style:const TextStyle(height: 3.0,fontSize: 15.2,fontWeight: FontWeight.bold,color: Colors.black,),
+                style: const TextStyle(height: 3.0, fontSize: 15.2, fontWeight: FontWeight.bold, color: Colors.black),
               ),
             ),
           ],
@@ -200,3 +169,4 @@ class _AdminDetailScreenState extends State<AdminDetailScreen> {
     );
   }
 }
+

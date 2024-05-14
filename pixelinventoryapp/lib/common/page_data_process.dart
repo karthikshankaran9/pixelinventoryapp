@@ -19,12 +19,13 @@ String getPayloadWithMailContent() {
   List<Map<String, dynamic>> componentMapList =
       componentList.map((component) => component.toJson()).toList();
 
-  String jsonString = jsonEncode(componentMapList);
+  // String jsonString = jsonEncode(componentMapList);
+  // String jsonString1 = jsonString.replaceAll("\"[","[");
 
   Map<String, dynamic> payload = {
     'employee_name': getGeneralSettings().email,
     'request': 'Component Request',
-    'component_list': jsonString,
+    'component_list': componentMapList,
   };
 
   return jsonEncode(payload);

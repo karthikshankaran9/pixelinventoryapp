@@ -10,6 +10,8 @@ const String loginAPI = 'login';
 const String registrationAPI = 'registration';
 const String emailAPI = 'email';
 const String getComponentListAPI = 'getComponentList';
+const String  admindashboardlistAPI = 'admindashboard' ;
+
 
 Future<Map<String, dynamic>> getLoginInfo(String email, String password) async {
   var reqBody = {
@@ -71,9 +73,6 @@ Future<List<Map<String, dynamic>>> getComponentsListFromServer(
 
   final response = await http.post(
     Uri.parse('$rmsWebServerHost/$getComponentListAPI'),
-    // headers: {
-    //   "Content-Type": "application/json",
-    // },
     body: jsonEncode(reqBody),
   );
 
@@ -86,36 +85,22 @@ Future<List<Map<String, dynamic>>> getComponentsListFromServer(
   }
 }
 
+ Future<List<Map<String, dynamic>>> adminApprovalFetchData() async {
+    final Uri url = Uri.parse('$rmsWebServerHost/$admindashboardlistAPI');
+    final response = await http.get(url);
+
+    if (response.statusCode == 200) {
+      List<dynamic> responseBody = jsonDecode(response.body);
+      return responseBody.cast<Map<String, dynamic>>();
+    } else {
+      throw Exception('Failed to load data');
+    }
+  }
+
 Future<void> sendSelectedItems() async {
-  // Map<String, dynamic> payload = {
-  //   'name': email,
-  //   'subject': 'Component Request',
-  //   'body': mapSelectedCompnentList.keys.toList(),
-  // };
-
-  // var temp = getPayloadWithMailContent(email);
-  // var jsonPayload = json.encode(payload);
-
-  // List<ComponentDetails> componentList =
-  //     mapSelectedCompnentList.values.toList();
-
-  // List<Map<String, dynamic>> componentMapList =
-  //     componentList.map((component) => component.toJson()).toList();
-
-  // String jsonString = jsonEncode(componentMapList);
-
-  // Map<String, dynamic> payload = {
-  //   'employee_name': email,
-  //   'request': 'Component Request',
-  //   'component_list': jsonString,
-  // };
-
   try {
     var response = await http.post(
       Uri.parse('$rmsWebServerHost/$emailAPI'),
-      // headers: {
-      //   'Content-Type': 'application/json',
-      // },
       body: getPayloadWithMailContent(),
     );
 
