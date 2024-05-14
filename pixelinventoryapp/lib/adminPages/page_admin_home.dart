@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:pixelinventoryapp/Page_admin_approval.dart';
+import 'package:pixelinventoryapp/adminPages/page_admin_approval.dart';
 
 class Mail {
   final int id;
