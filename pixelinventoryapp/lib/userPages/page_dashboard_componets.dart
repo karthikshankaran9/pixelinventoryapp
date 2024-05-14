@@ -174,7 +174,10 @@ class _DashBoardState extends State<DashBoard> {
         selectedComponentDetails.componentName = componentDetails.componentName;
         selectedComponentDetails.availableAssetIds =
             componentDetails.availableAssetIds;
+<<<<<<< HEAD
             selectedComponentDetails.status = componentDetails.status;
+=======
+>>>>>>> 587d79c00cfe457d94835930f2b983955462bdfa
         mapSelectedCompnentList[selectedItem] = selectedComponentDetails;
       });
     }
