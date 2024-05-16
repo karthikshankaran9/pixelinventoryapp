@@ -23,7 +23,7 @@ String getPayloadWithMailContent() {
   // String jsonString1 = jsonString.replaceAll("\"[","[");
 
   Map<String, dynamic> payload = {
-    'employee_name': getGeneralSettings().email,
+    'employee_name': getGeneralSettings().name,
     'request': 'Component Request',
     'component_list': componentMapList,
   };

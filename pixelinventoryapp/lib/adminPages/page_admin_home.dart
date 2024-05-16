@@ -1,4 +1,6 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
 import 'package:pixelinventoryapp/adminPages/page_admin_approval.dart';
 
 class Mail {
@@ -15,8 +17,14 @@ class Mail {
   });
 }
 
-class MailListScreen extends StatelessWidget {
-  final List<Mail> mails = [
+class AdminMainPage extends StatefulWidget {
+  @override
+  _AdminListViewState createState() => _AdminListViewState();
+}
+
+class _AdminListViewState extends State<AdminMainPage> {
+  List<String> employeeNames = [];
+    final List<Mail> mails = [
     Mail(
       id: 1,
       sender: 'Amy Lucky',
@@ -26,10 +34,28 @@ class MailListScreen extends StatelessWidget {
   ];
 
   @override
+  void initState() {
+    super.initState();
+    fetchData();
+  }
+
+  Future<void> fetchData() async {
+    final response = await http.get(Uri.parse('http://10.44.100.27:8000/adminlistview'));
+    if (response.statusCode == 200) {
+      setState(() {
+        List<Map<String, dynamic>> data = List<Map<String, dynamic>>.from(jsonDecode(response.body));
+        employeeNames = data.map((e) => e['employee_name'] as String).toList();
+      });
+    } else {
+      throw Exception('Failed to load data');
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Inbox'),
+        title: Text('Admin List View Inbox'),
         flexibleSpace: Container(
           decoration: BoxDecoration(
             gradient: LinearGradient(
@@ -44,13 +70,12 @@ class MailListScreen extends StatelessWidget {
             colors: [Colors.teal.shade200, Colors.purple.shade900],
           ),
         ),
-        child:  ListView.builder(
-        itemCount: mails.length,
+      child:ListView.builder(
+        itemCount: employeeNames.length,
         itemBuilder: (context, index) {
           return ListTile(
-            title: Text(mails[index].sender),
-            subtitle: Text(mails[index].subject),
-            onTap: () {
+            title: Text(employeeNames[index]),
+              onTap: () {
               Navigator.push(
                 context,
                 MaterialPageRoute(
@@ -69,10 +94,4 @@ class MailListScreen extends StatelessWidget {
     );
   }
 }
-
-
-
-
-
-
 

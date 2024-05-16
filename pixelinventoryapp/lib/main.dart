@@ -40,31 +40,13 @@ class _MyHomePageState extends State<MyHomePage> {
   final TextEditingController _emailController =
       TextEditingController(text: '@pixelexpert.net');
   final TextEditingController _passwordController = TextEditingController();
-
-  Future<void> login1() async {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => DashBoard(),
-      ),
-    );
-  }
+  String message = '';
 
   Future<void> login() async {
     final String email = _emailController.text;
     final String password = _passwordController.text;
     GeneralSettings generalSettings = GeneralSettings();
-    // Check if email is admin email
-    if (email == 'nishadh.m@pixelexpert.net') {
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => MailListScreen(),
-          //builder: (context) =>AdminStatusChange(),
-        ),
-      );
-      return;
-    }
+
     // Regular login process
     if (!email.contains('@pixelexpert.net') || email.split('@')[0].isEmpty) {
       getFluttertoastMessage(
@@ -90,17 +72,32 @@ class _MyHomePageState extends State<MyHomePage> {
     loginInfo = await getLoginInfo(email, password);
 
     if (loginInfo['success'] == true) {
-      getFluttertoastMessage(Colors.green, Colors.white, 'Login Successful',
-          Toast.LENGTH_LONG, 15, ToastGravity.CENTER);
-
+      getFluttertoastMessage(
+          Colors.green,
+          Colors.white,
+          ('Welcome ' + loginInfo['name']),
+          Toast.LENGTH_LONG,
+          15,
+          ToastGravity.CENTER);
       generalSettings.email = email;
+      generalSettings.name = loginInfo['name'];
+
       setGeneralSettings(generalSettings);
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => DashBoard(),
-        ),
-      );
+
+      if (loginInfo['role'] == 'admin') {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => AdminMainPage(),
+          ),
+        );
+      } else
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => DashBoard(),
+          ),
+        );
     } else {
       getFluttertoastMessage(Colors.green, Colors.red, loginInfo['message'],
           Toast.LENGTH_LONG, 15, ToastGravity.CENTER);

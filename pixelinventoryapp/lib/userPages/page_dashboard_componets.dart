@@ -4,33 +4,6 @@ import 'package:pixelinventoryapp/apiCommunication/page_api_communication.dart';
 import 'package:pixelinventoryapp/common/page_common.dart';
 import 'package:pixelinventoryapp/common/page_data_process.dart';
 
-class UserInfoWidget extends StatelessWidget {
-  final String name;
-  final String email;
-  const UserInfoWidget({
-    required this.name,
-    required this.email,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.end,
-      children: [
-        Text(
-          name,
-          style: const TextStyle(fontSize: 16, color: Colors.white),
-        ),
-        const SizedBox(width: 10),
-        Text(
-          email,
-          style: const TextStyle(fontSize: 16, color: Colors.white),
-        ),
-      ],
-    );
-  }
-}
-
 class DashBoard extends StatefulWidget {
   @override
   _DashBoardState createState() => _DashBoardState();
@@ -174,10 +147,7 @@ class _DashBoardState extends State<DashBoard> {
         selectedComponentDetails.componentName = componentDetails.componentName;
         selectedComponentDetails.availableAssetIds =
             componentDetails.availableAssetIds;
-<<<<<<< HEAD
-            selectedComponentDetails.status = componentDetails.status;
-=======
->>>>>>> 587d79c00cfe457d94835930f2b983955462bdfa
+        selectedComponentDetails.status = componentDetails.status;
         mapSelectedCompnentList[selectedItem] = selectedComponentDetails;
       });
     }
@@ -267,9 +237,9 @@ class _DashBoardState extends State<DashBoard> {
             Positioned(
               top: 15,
               right: 100,
-              child: UserInfoWidget(
-                name: '',
-                email: generalSettings.email,
+              child: Text(
+                generalSettings.name,
+                style: const TextStyle(fontSize: 16, color: Colors.white),
               ),
             ),
           ],
@@ -459,7 +429,7 @@ class _DashBoardState extends State<DashBoard> {
                                     ("Status: ${mapSelectedCompnentList[item]!.status}"), // Updated line
                                     style: const TextStyle(
                                         color: Colors.white, fontSize: 15),
-                                  ), 
+                                  ),
                                   const SizedBox(width: 10),
                                   IconButton(
                                     icon: const Icon(Icons.remove),

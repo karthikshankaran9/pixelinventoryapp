@@ -28,6 +28,7 @@ Future<Map<String, dynamic>> getLoginInfo(String email, String password) async {
     Map<String, dynamic> data;
     if (response.statusCode == 200) {
       data = json.decode(response.body);
+      
     } else {
       data = {"failure": "Invalid response"};
     }
