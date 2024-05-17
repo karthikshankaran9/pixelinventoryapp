@@ -1,6 +1,4 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:pixelinventoryapp/apiCommunication/page_api_communication.dart';
 
 class AdminDetailScreen extends StatefulWidget {
@@ -22,35 +20,16 @@ class AdminDetailScreen extends StatefulWidget {
 class _AdminDetailScreenState extends State<AdminDetailScreen> {
   List<Map<String, dynamic>> data = [];
 
+  void updateData(List<Map<String, dynamic>> newData) {
+    setState(() {
+      data = newData;
+    });
+  }
+
   @override
   void initState() {
     super.initState();
-    fetchDataFromServer();
-  }
-
-  Future<void> fetchDataFromServer() async {
-    try {
-      List<Map<String, dynamic>> responseData = await adminApprovalFetchData();
-      setState(() {
-        data = responseData;
-      });
-    } catch (e) {
-      print('Error fetching data: $e');
-    }
-  }
-
-  void updateComponents(int? userAssetId, String newStatus) {
-    if (userAssetId != null) {
-      setState(() {
-        data.forEach((item) {
-          if (item['user_asset_id'] == userAssetId) {
-            item['newStatus'] = newStatus;
-          }
-        });
-      });
-    } else {
-      print('userAssetId is null');
-    }
+    adminApprovalFetchData(widget.sender, updateData);
   }
 
   @override
@@ -104,38 +83,38 @@ class _AdminDetailScreenState extends State<AdminDetailScreen> {
                   child: DataTable(
                     columns: const [
                       DataColumn(
-                        label: Text('Components List',style: TextStyle(height: 1.2,fontSize: 15.2,fontWeight: FontWeight.bold,color: Colors.black,),),
+                        label: Text('Components List', style: TextStyle(height: 1.2, fontSize: 15.2, fontWeight: FontWeight.bold, color: Colors.black)),
                       ),
                       DataColumn(
-                        label: Text('Selected Asset_Id',style: TextStyle(height: 1.2,fontSize: 15.2,fontWeight: FontWeight.bold,color: Colors.black,),),
+                        label: Text('Selected Asset_Id', style: TextStyle(height: 1.2, fontSize: 15.2, fontWeight: FontWeight.bold, color: Colors.black)),
                       ),
+                      // DataColumn(
+                      //   label: Text('Change Status',style: TextStyle(height: 1.2,fontSize: 15.2,fontWeight: FontWeight.bold,color: Colors.black,),),
+                      // ),
                       DataColumn(
-                        label: Text('Change Status',style: TextStyle(height: 1.2,fontSize: 15.2,fontWeight: FontWeight.bold,color: Colors.black,),),
-                      ),
-                      DataColumn(
-                        label: Text('Available Count Status',style: TextStyle(height: 1.2,fontSize: 15.2,fontWeight: FontWeight.bold,color: Colors.black,),),
+                        label: Text('Available Count Status', style: TextStyle(height: 1.2, fontSize: 15.2, fontWeight: FontWeight.bold, color: Colors.black)),
                       ),
                     ],
                     rows: data.map((item) {
                       return DataRow(cells: [
                         DataCell(Text(item['components'])),
                         DataCell(Text(item['asset_id'].toString())),
-                        DataCell(
-                          DropdownButtonFormField<String>(
-                            value: item['newStatus'] as String?,
-                            onChanged: (String? newValue) {
-                              updateComponents(item['user_asset_id'] as int?, newValue ?? '');
-                            },
-                            items: <String>['In use', 'Not Working', 'Not Available']
-                                .map<DropdownMenuItem<String>>((String value) {
-                              return DropdownMenuItem<String>(
-                                value: value,
-                                child: Text(value),
-                              );
-                            }).toList(),
-                            decoration: const InputDecoration(labelText: 'Status'),
-                          ),
-                        ),
+                        // DataCell(
+                        //   DropdownButtonFormField<String>(
+                        //     value: item['newStatus'] as String?,
+                        //     onChanged: (String? newValue) {
+                        //       updateComponents(item['asset_id'] as int?, newValue ?? '');
+                        //     },
+                        //     items: <String>['In use', 'Not Working', 'Not Available']
+                        //         .map<DropdownMenuItem<String>>((String value) {
+                        //       return DropdownMenuItem<String>(
+                        //         value: value,
+                        //         child: Text(value),
+                        //       );
+                        //     }).toList(),
+                        //     decoration: const InputDecoration(labelText: 'Status'),
+                        //   ),
+                        // ),
                         DataCell(Text(item['no_of_counts'].toString())),
                       ]);
                     }).toList(),
@@ -155,16 +134,17 @@ class _AdminDetailScreenState extends State<AdminDetailScreen> {
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
                     Tooltip(
-                      message: "Click this to send an email",
+                      message: "Click this to send approval",
                       child: ElevatedButton(
                         onPressed: () {
-                          // Add functionality here
+                          sendApprovalData(data);
                         },
                         style: ButtonStyle(
-                          backgroundColor: MaterialStateProperty.all<Color>(Colors.green),
+                          backgroundColor:
+                              MaterialStateProperty.all<Color>(Colors.green),
                         ),
                         child: const Text(
-                          "Submit",
+                          "Approve",
                           style: TextStyle(color: Colors.white),
                         ),
                       ),

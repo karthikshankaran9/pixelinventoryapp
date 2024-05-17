@@ -11,6 +11,8 @@ const String registrationAPI = 'registration';
 const String emailAPI = 'email';
 const String getComponentListAPI = 'getComponentList';
 const String  admindashboardlistAPI = 'admindashboard' ;
+const String adminlistviewlistAPI = 'adminlistview';
+const String adminstatuschangelistAPI = 'admin_status_change';
 
 
 Future<Map<String, dynamic>> getLoginInfo(String email, String password) async {
@@ -86,17 +88,74 @@ Future<List<Map<String, dynamic>>> getComponentsListFromServer(
   }
 }
 
- Future<List<Map<String, dynamic>>> adminApprovalFetchData() async {
-    final Uri url = Uri.parse('$rmsWebServerHost/$admindashboardlistAPI');
-    final response = await http.get(url);
+Future<List<Map<String, dynamic>>> fetchData() async {
+  final response = await http.get(Uri.parse('$rmsWebServerHost/$adminlistviewlistAPI'));
+
+  if (response.statusCode == 200) {
+    List<Map<String, dynamic>> data = List<Map<String, dynamic>>.from(jsonDecode(response.body));
+    return data;
+  } else {
+    throw Exception('Failed to load data');
+  }
+}
+
+  Future<void> adminApprovalFetchData(String sender, Function(List<Map<String, dynamic>>) updateData) async {
+  try {
+    final response = await http.post(
+      Uri.parse('$rmsWebServerHost/$admindashboardlistAPI'),
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: jsonEncode({'name': sender}),
+    );
 
     if (response.statusCode == 200) {
-      List<dynamic> responseBody = jsonDecode(response.body);
-      return responseBody.cast<Map<String, dynamic>>();
+      List<Map<String, dynamic>> responseData = List<Map<String, dynamic>>.from(json.decode(response.body));
+      updateData(responseData);
     } else {
-      throw Exception('Failed to load data');
+      print('Failed to load data');
     }
+  } catch (e) {
+    print('Error fetching data: $e');
   }
+}
+
+Future<void> sendApprovalData(List<Map<String, dynamic>> data,) async {
+  List<Map<String, String>> componentsDetails = data.map((item) {
+    return {
+      "user_asset_id": item['asset_id'].toString(),
+    };
+  }).toList();
+
+  Map<String, dynamic> requestData = {
+    "components_details": componentsDetails,
+  };
+
+  try {
+    final response = await http.post(
+      Uri.parse('$rmsWebServerHost/$adminstatuschangelistAPI'),
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: jsonEncode(requestData),
+    );
+
+    if (response.statusCode == 200) {
+      print('Data sent successfully');
+      getFluttertoastMessage(Colors.green, Colors.white, 'Data sent successfully',
+        Toast.LENGTH_LONG, 15, ToastGravity.CENTER);
+    } else {
+      print('Failed to send data');
+      getFluttertoastMessage(Colors.green, Colors.white, 'Failed to send data',
+        Toast.LENGTH_LONG, 15, ToastGravity.CENTER);
+    }
+  } catch (e) {
+    print('Error sending data: $e');
+      getFluttertoastMessage(Colors.green, Colors.white, 'Error sending data: $e',
+        Toast.LENGTH_LONG, 15, ToastGravity.CENTER);
+  
+  }
+}
 
 Future<void> sendSelectedItems() async {
   try {

@@ -1,7 +1,6 @@
-import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
 import 'package:pixelinventoryapp/adminPages/page_admin_approval.dart';
+import 'package:pixelinventoryapp/apiCommunication/page_api_communication.dart';
 
 class Mail {
   final int id;
@@ -24,31 +23,56 @@ class AdminMainPage extends StatefulWidget {
 
 class _AdminListViewState extends State<AdminMainPage> {
   List<String> employeeNames = [];
-    final List<Mail> mails = [
-    Mail(
-      id: 1,
-      sender: 'Amy Lucky',
-      subject: 'Report Submission',
-      body: 'My components request is wait for your approval. Please click here to approve/reject.',
-    ),
-  ];
+  List<Mail> mails = [];
 
   @override
   void initState() {
     super.initState();
-    fetchData();
+    _loadData();
   }
 
-  Future<void> fetchData() async {
-    final response = await http.get(Uri.parse('http://10.44.100.27:8000/adminlistview'));
-    if (response.statusCode == 200) {
-      setState(() {
-        List<Map<String, dynamic>> data = List<Map<String, dynamic>>.from(jsonDecode(response.body));
-        employeeNames = data.map((e) => e['employee_name'] as String).toList();
-      });
-    } else {
-      throw Exception('Failed to load data');
+  Future<void> _loadData() async {
+    try {
+      List<Map<String, dynamic>> data = await fetchData();
+      if (data.isEmpty) {
+        _showPopup('No Request', 'There is no request available to display.');
+      } else {
+        setState(() {
+          employeeNames = data.map((e) => e['employee_name'] as String).toList();
+          // Create a corresponding mail for each employee
+          mails = employeeNames.map((name) {
+            return Mail(
+              id: employeeNames.indexOf(name) + 1,
+              sender: name,
+              subject: 'Report Submission',
+              body: 'My components request is wait for your approval. Please click here to approve/reject.',
+            );
+          }).toList();
+        });
+      }
+    } catch (e) {
+      print('Error loading data: $e');
     }
+  }
+
+  void _showPopup(String title, String message) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text(title),
+          content: Text(message),
+          actions: <Widget>[
+            TextButton(
+              child: Text('OK'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
   }
 
   @override
@@ -64,34 +88,37 @@ class _AdminListViewState extends State<AdminMainPage> {
           ),
         ),
       ),
-      body:Container(
+      body: Container(
         decoration: BoxDecoration(
           gradient: LinearGradient(
             colors: [Colors.teal.shade200, Colors.purple.shade900],
           ),
         ),
-      child:ListView.builder(
-        itemCount: employeeNames.length,
-        itemBuilder: (context, index) {
-          return ListTile(
-            title: Text(employeeNames[index]),
+        child: ListView.builder(
+          itemCount: employeeNames.length,
+          itemBuilder: (context, index) {
+            return ListTile(
+              title: Text(employeeNames[index]),
               onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => AdminDetailScreen(
-                    title: mails[index].subject,
-                    sender: mails[index].sender,
-                    body: mails[index].body,
-                  ),
-                ),
-              );
-            },
-          );
-        },
-      ),
+                if (index < mails.length) {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => AdminDetailScreen(
+                        title: mails[index].subject,
+                        sender: mails[index].sender,
+                        body: mails[index].body,
+                      ),
+                    ),
+                  );
+                } else {
+                  print('No corresponding mail found for employee');
+                }
+              },
+            );
+          },
+        ),
       ),
     );
   }
 }
-
