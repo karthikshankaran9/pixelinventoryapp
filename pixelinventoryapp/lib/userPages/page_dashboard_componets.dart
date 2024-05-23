@@ -86,7 +86,7 @@ class _DashBoardState extends State<DashBoard> {
   void increaseDeviceCount(String selectedItem) {
     setState(() {
       if ((mapSelectedCompnentList[selectedItem]!.count) <
-          mapCompnentList[selectedItem]!.count) {
+          mapSelectedCompnentList[selectedItem]!.availableAssetIds.length) {
         ComponentDetails selectedComponentDetails =
             ComponentDetails(availableAssetIds: [], selectedAssetIds: []);
         selectedComponentDetails = mapSelectedCompnentList[selectedItem]!;
