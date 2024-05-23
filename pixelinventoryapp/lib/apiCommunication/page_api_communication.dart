@@ -9,6 +9,8 @@ const String rmsWebServerHost = 'http://10.44.100.27:8000';
 const String loginAPI = 'login';
 const String registrationAPI = 'registration';
 const String emailAPI = 'email';
+const String forgetPasswordAPI = 'forgetPassword';
+const String updatePasswordAPI = 'updatePassword';
 const String getComponentListAPI = 'getComponentList';
 const String  admindashboardlistAPI = 'admindashboard' ;
 const String adminlistviewlistAPI = 'adminlistview';
@@ -65,6 +67,56 @@ Future<Map<String, dynamic>> registerLoginInfo(
     return data;
   } catch (e) {
     return {"failure": "Exception"};
+  }
+}
+
+Future<Map<String, dynamic>> forgetPassword(String employeeId) async {
+  final url = '$rmsWebServerHost/$forgetPasswordAPI';
+  final Map<String, dynamic> data = {
+    "employee_id": employeeId,
+  };
+
+  final response = await http.post(
+    Uri.parse(url),
+    headers: <String, String>{
+      'Content-Type': 'application/json; charset=UTF-8',
+    },
+    body: jsonEncode(data),
+  );
+
+   if (response.statusCode == 200) {
+    final responseData = json.decode(response.body);
+    getFluttertoastMessage(Colors.green, Colors.white, responseData['message'],
+        Toast.LENGTH_LONG, 15, ToastGravity.CENTER);
+    return responseData;
+  } else {
+    getFluttertoastMessage(Colors.red, Colors.white, 'Failed to reset passworda',
+        Toast.LENGTH_LONG, 15, ToastGravity.CENTER);
+    return {"failure": "Failed to reset password"};
+  }
+}
+
+ Future<Map<String, dynamic>> updatePassword(
+    String email, String password, String confirmPassword) async {
+ final url = '$rmsWebServerHost/$updatePasswordAPI';
+  final Map<String, dynamic> data = {
+    "email": email,
+    "password": password,
+    "confirmpassword": confirmPassword,
+  };
+
+  final response = await http.post(
+    Uri.parse(url),
+    headers: <String, String>{
+      'Content-Type': 'application/json; charset=UTF-8',
+    },
+    body: jsonEncode(data),
+  );
+
+  if (response.statusCode == 200) {
+    return json.decode(response.body);
+  } else {
+    return {"failure": "Failed to update password"};
   }
 }
 

@@ -2,7 +2,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:pixelinventoryapp/userPages/page_register.dart';
-import 'package:pixelinventoryapp/userPages/page_forgot_password.dart';
+import 'package:pixelinventoryapp/forgetpassword.dart/page_forgot_password.dart';
 import 'package:pixelinventoryapp/userPages/page_dashboard_componets.dart';
 import 'package:pixelinventoryapp/adminPages/page_admin_home.dart';
 import 'package:pixelinventoryapp/common/page_data_process.dart';
@@ -47,7 +47,6 @@ class _MyHomePageState extends State<MyHomePage> {
     final String password = _passwordController.text;
     GeneralSettings generalSettings = GeneralSettings();
 
-    // Regular login process
     if (!email.contains('@pixelexpert.net') || email.split('@')[0].isEmpty) {
       getFluttertoastMessage(
           Colors.red,
@@ -242,7 +241,7 @@ class _MyHomePageState extends State<MyHomePage> {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                              builder: (context) => ForgetPasswordPage()),
+                              builder: (context) =>  ForgetPasswordPage()),
                         );
                       },
                       child: const Padding(
